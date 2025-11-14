@@ -4,7 +4,4 @@ Flask-WTF==1.2.1
 python-dotenv==1.0.0
 requests==2.31.0
 bcrypt==4.1.2
-portalocker==2.8.2  # ← ДОБАВЬТЕ ЭТО
-vkbottle>=1.0
-aiohttp
-httpx 
+portalocker==2.8.2
