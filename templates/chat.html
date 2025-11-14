@@ -688,6 +688,7 @@ const user_id = "{{ user_id }}";
 const socket = io();
 const msgDiv = document.getElementById('messages');
 const answer = document.getElementById('answer');
+const csrfToken = '{{ csrf_token() }}';
 const endModal = document.getElementById('endModal');
 const finalMessageInput = document.getElementById('finalMessage');
 const templatesPanel = document.getElementById('templatesPanel');

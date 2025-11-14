@@ -30,10 +30,27 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+@keyframes fadeInDelayed {
+  from { opacity: 0; transform: translateY(50px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes capybaraSway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-1.5deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(1.5deg); }
+}
+
+@keyframes turtleFloat {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes catBounce {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-6px) scale(1.03); }
 }
 
 /* === БАЗОВЫЕ СТИЛИ === */
@@ -43,10 +60,15 @@
   box-sizing: border-box;
 }
 
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--primary), var(--secondary), var(--dark));
@@ -68,12 +90,18 @@ body::before {
   z-index: -1;
 }
 
-/* === КОНТЕЙНЕР === */
-.auth-container {
-  animation: fadeIn 0.6s ease-out;
+/* === ГЛАВНЫЙ КОНТЕЙНЕР === */
+.main-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 80px;
+  min-height: 100vh;
   z-index: 1;
 }
 
+/* === ФОРМА === */
 .auth-box {
   background: var(--glass);
   backdrop-filter: blur(12px);
@@ -85,6 +113,7 @@ body::before {
   max-width: 90vw;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: fadeIn 0.6s ease-out;
 }
 
 .auth-box:hover {
@@ -262,10 +291,114 @@ body::before {
     font-size: 22px;
   }
 }
+
+/* === ЖИВОТНЫЕ СНИЗУ === */
+.animals-bottom-container {
+  display: flex;
+  gap: 30px;
+  align-items: flex-end;
+  opacity: 0;
+  animation: fadeInDelayed 0.8s ease-out 1s forwards;
+}
+
+.animal-bottom {
+  cursor: pointer;
+  filter: drop-shadow(0 6px 15px rgba(0,0,0,0.25));
+  transition: transform 0.3s ease;
+  position: relative;
+}
+
+.animal-bottom:hover {
+  transform: translateY(-8px);
+}
+
+/* Капибара */
+.capybara-bottom {
+  animation: capybaraSway 6s ease-in-out infinite;
+}
+
+.capybara-svg {
+  width: 100px;
+  height: 85px;
+  display: block;
+}
+
+/* Черепашка */
+.turtle-container {
+  animation: turtleFloat 8s ease-in-out infinite;
+}
+
+.turtle-svg {
+  width: 65px;
+  height: 55px;
+  display: block;
+}
+
+/* Кот */
+.cat-container {
+  animation: catBounce 5s ease-in-out infinite;
+}
+
+.cat-svg {
+  width: 80px;
+  height: 80px;
+  display: block;
+}
+
+/* Облачко для всех животных */
+.animal-speech {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 18px;
+  font-size: 13px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.animal-speech.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-8px);
+}
+
+.animal-speech::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--glass-border);
+}
+
+/* Анимация моргания */
+@keyframes blink {
+  0%, 90%, 100% { opacity: 1; }
+  95% { opacity: 0; }
+}
+
+.capybara-eye {
+  animation: blink 5s infinite;
+}
 </style>
 </head>
 <body>
-  <div class="auth-container">
+  <div class="main-wrapper">
+    <!-- ФОРМА -->
     <div class="auth-box">
       <div class="auth-header">
         <div class="logo">📋</div>
@@ -274,6 +407,7 @@ body::before {
       </div>
       
       <form method="POST" class="auth-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="input-group">
           <span class="input-icon">👤</span>
           <input class="auth-input" name="username" placeholder="Логин" required>
@@ -297,6 +431,142 @@ body::before {
         Разработка: <a href="#">Luiz</a> | ЦЗН Рязанской области
       </div>
     </div>
+    
+    <!-- ЖИВОТНЫЕ -->
+    <div class="animals-bottom-container">
+      <!-- Капибара -->
+      <div class="animal-bottom capybara-bottom" onclick="animalTalk('capybara')">
+        <svg class="capybara-svg" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="60" cy="65" rx="45" ry="28" fill="#a0522d" stroke="#7a3f1f" stroke-width="1.5"/>
+          <circle cx="60" cy="35" r="22" fill="#a0522d" stroke="#7a3f1f" stroke-width="1.5"/>
+          <ellipse cx="45" cy="25" rx="6" ry="10" fill="#8b4513" stroke="#7a3f1f" stroke-width="1"/>
+          <ellipse cx="75" cy="25" rx="6" ry="10" fill="#8b4513" stroke="#7a3f1f" stroke-width="1"/>
+          <circle class="capybara-eye" cx="52" cy="32" r="3.5" fill="#000"/>
+          <circle class="capybara-eye" cx="68" cy="32" r="3.5" fill="#000"/>
+          <circle cx="53" cy="31" r="1.2" fill="#fff"/>
+          <circle cx="69" cy="31" r="1.2" fill="#fff"/>
+          <ellipse cx="60" cy="40" rx="3" ry="2.5" fill="#654321"/>
+          <path d="M 55 42 Q 60 45 65 42" stroke="#654321" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <ellipse cx="40" cy="85" rx="8" ry="12" fill="#8b4513" stroke="#7a3f1f" stroke-width="1"/>
+          <ellipse cx="80" cy="85" rx="8" ry="12" fill="#8b4513" stroke="#7a3f1f" stroke-width="1"/>
+          <ellipse cx="95" cy="70" rx="4" ry="2" fill="#654321" transform="rotate(30 95 70)"/>
+        </svg>
+        <div class="animal-speech" id="capybaraSpeech"></div>
+      </div>
+      
+      <!-- Черепашка -->
+      <div class="animal-bottom turtle-container" onclick="animalTalk('turtle')">
+        <svg class="turtle-svg" viewBox="0 0 70 60" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="35" cy="30" rx="28" ry="22" fill="#2d5016" stroke="#1e3d0f" stroke-width="1.5"/>
+          <path d="M 20 30 Q 35 20 50 30 Q 35 40 20 30" fill="#3a6b1f" stroke="#1e3d0f" stroke-width="1"/>
+          <circle cx="35" cy="15" r="8" fill="#4a7c2e" stroke="#1e3d0f" stroke-width="1"/>
+          <circle cx="32" cy="14" r="2" fill="#000"/>
+          <circle cx="38" cy="14" r="2" fill="#000"/>
+          <circle cx="32.5" cy="13.5" r="0.8" fill="#fff"/>
+          <circle cx="38.5" cy="13.5" r="0.8" fill="#fff"/>
+          <ellipse cx="20" cy="35" rx="5" ry="8" fill="#4a7c2e" stroke="#1e3d0f" stroke-width="1" transform="rotate(-30 20 35)"/>
+          <ellipse cx="50" cy="35" rx="5" ry="8" fill="#4a7c2e" stroke="#1e3d0f" stroke-width="1" transform="rotate(30 50 35)"/>
+          <ellipse cx="20" cy="50" rx="5" ry="8" fill="#4a7c2e" stroke="#1e3d0f" stroke-width="1" transform="rotate(-60 20 50)"/>
+          <ellipse cx="50" cy="50" rx="5" ry="8" fill="#4a7c2e" stroke="#1e3d0f" stroke-width="1" transform="rotate(60 50 50)"/>
+          <ellipse cx="55" cy="25" rx="3" ry="1.5" fill="#2d5016" transform="rotate(45 55 25)"/>
+        </svg>
+        <div class="animal-speech" id="turtleSpeech"></div>
+      </div>
+      
+      <!-- КОТИК С БЕЛЫМИ ДЕТАЛЯМИ И УЛЫБКОЙ -->
+      <div class="animal-bottom cat-container" onclick="animalTalk('cat')">
+        <svg class="cat-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <!-- Голова -->
+          <circle cx="50" cy="50" r="35" fill="#696969" stroke="#2a2a2a" stroke-width="1.5"/>
+          
+          <!-- Белая грудка -->
+          <ellipse cx="50" cy="70" rx="25" ry="15" fill="#f0f0f0"/>
+          
+          <!-- Ушки внутри (розовые) -->
+          <path d="M 25 35 L 20 25 L 30 30 Z" fill="#ffb6c1"/>
+          <path d="M 75 35 L 80 25 L 70 30 Z" fill="#ffb6c1"/>
+          
+          <!-- Ушки снаружи -->
+          <path d="M 25 35 L 15 20 L 32 28 Z" fill="#696969" stroke="#2a2a2a" stroke-width="1.5"/>
+          <path d="M 75 35 L 85 20 L 68 28 Z" fill="#696969" stroke="#2a2a2a" stroke-width="1.5"/>
+          
+          <!-- Глаза -->
+          <ellipse cx="40" cy="48" rx="4" ry="6" fill="#00ff00" transform="rotate(-10 40 48)"/>
+          <ellipse cx="60" cy="48" rx="4" ry="6" fill="#00ff00" transform="rotate(10 60 48)"/>
+          <circle cx="40" cy="48" r="2.5" fill="#000"/>
+          <circle cx="60" cy="48" r="2.5" fill="#000"/>
+          <circle cx="39" cy="47" r="1" fill="#fff"/>
+          <circle cx="59" cy="47" r="1" fill="#fff"/>
+          
+          <!-- Нос -->
+          <path d="M 50 58 L 47 61 L 50 63 L 53 61 Z" fill="#ff69b4"/>
+          
+          <!-- УЛЫБКА как у капибары -->
+          <path d="M 42 65 Q 50 68 58 65" stroke="#2a2a2a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          
+          <!-- Белые усы (толще) -->
+          <line x1="15" y1="50" x2="30" y2="52" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          <line x1="15" y1="55" x2="30" y2="55" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          <line x1="70" y1="52" x2="85" y2="50" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          <line x1="70" y1="55" x2="85" y2="55" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          
+          <!-- Белые лапки -->
+          <ellipse cx="25" cy="85" rx="6" ry="8" fill="#f0f0f0" stroke="#2a2a2a" stroke-width="1" transform="rotate(-20 25 85)"/>
+          <ellipse cx="75" cy="85" rx="6" ry="8" fill="#f0f0f0" stroke="#2a2a2a" stroke-width="1" transform="rotate(20 75 85)"/>
+        </svg>
+        <div class="animal-speech" id="catSpeech"></div>
+      </div>
+    </div>
   </div>
+
+<script>
+const animalPhrases = {
+  capybara: [
+    "Привет! Я капибара-админ 🐹",
+    "Войди в систему, пожалуйста!",
+    "ЦЗН Рязань ждёт тебя!",
+    "Я слежу за безопасностью 🔒",
+    "Логин и пароль, плиз",
+    "Капибара одобряет вход ✨",
+    "Мы сделаем отчёт лучше всех!",
+    "Не волнуйся, я помогу 💪"
+  ],
+  turtle: [
+    "Я черепашка 🐢",
+    "Медленно, но верно!",
+    "Панцирь - мой дом",
+    "Не торопи меня",
+    "Я тут самая спокойная",
+    "Скорость не главное"
+  ],
+  cat: [
+    "Мяу! 😺",
+    "Котик следит за порядком",
+    "Муррр...",
+    "Моя лапка контролирует всё",
+    "Вход разрешён",
+    "Мур-мур, удачи!",
+    "Котик готов к работе!",
+    "Следим за безопасностью 🐾"
+  ]
+};
+
+function animalTalk(animalType) {
+  const speechElement = document.getElementById(animalType + 'Speech');
+  const phrases = animalPhrases[animalType];
+  const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+  
+  document.querySelectorAll('.animal-speech').forEach(el => {
+    el.classList.remove('show');
+  });
+  
+  speechElement.textContent = randomPhrase;
+  speechElement.classList.add('show');
+  
+  setTimeout(() => {
+    speechElement.classList.remove('show');
+  }, 3000);
+}
+</script>
 </body>
 </html>
